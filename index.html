@@ -275,6 +275,7 @@
         <div>Unanswered: ${unanswered}${hadNoKey?` · No key for ${hadNoKey} q(s)`:''}</div>
       `;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
     }
 
     // --- Navigation between views ---
@@ -308,14 +309,6 @@
       const btnSubmit = document.getElementById('btnSubmit');
       btnSubmit.onclick = () => scoreQuiz(blocks);
     }
-
-    const backBtn = document.getElementById('backBtn');
-    backBtn.onclick = () => {
-        quizView.classList.add('hidden');
-        frontPage.classList.remove('hidden');
-        window.scrollTo({ top: 0 });
-    };
-
 
     function route() {
       if (window.location.hash === '#quiz') showQuiz(); else showFront();
