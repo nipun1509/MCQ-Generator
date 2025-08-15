@@ -198,31 +198,31 @@
     // Greedy but robust block matcher: Q + 1) 2) 3) 4) + optional Answer:
     function parseInput(text) {
       const blocks = [];
-      const bigRe = /\s*([^\n].*?)\s*\n\s*1\)\s*(.*?)\s*\n\s*2\)\s*(.*?)\s*\n\s*3\)\s*(.*?)\s*\n\s*4\)\s*(.*?)(?:\n\s*(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4]))?(?:\n{2,}|\n?$)/g;
+      const bigRe = /\s*([^\n].*?)\s*\n\s*1\)\s*(.*?)\s*\n\s*2\)\s*(.*?)\s*\n\s*3\)\s*(.*?)\s*\n\s*4\)\s*(.*?)(?:\n\s*(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4]\s*))?(?:\n{2,}|\n?$)/g;
       let m; let index = 0;
       while ((m = bigRe.exec(text)) !== null) {
         const q = m[1].trim();
         const options = [m[2], m[3], m[4], m[5]].map(s => s.trim());
-        const correct = normalizeAnswerToken(m[6]);
+        const correct = m[6] ? normalizeAnswerToken(m[6].trim()) : null;
         blocks.push({ q, options, correct, id: index++ });
       }
 
       // fallback: line-walker (handles slight format issues)
       if (!blocks.length) {
-        const lines = text.split(/\r?\n/);
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
         for (let i=0; i<lines.length;) {
-          while (i<lines.length && !lines[i].trim()) i++;
-          if (i>=lines.length) break;
-          const q = lines[i++].trim();
+          const q = lines[i++] || '';
           const opts = [];
           for (let k=1; k<=4 && i<lines.length; k++) {
-            const m2 = lines[i].match(/^\s*\d\)\s*(.*)$/);
-            if (!m2) break; opts.push(m2[1].trim()); i++;
+            const m2 = lines[i].match(/^\d\)\s*(.*)$/);
+            if (!m2) break;
+            opts.push(m2[1].trim());
+            i++;
           }
           let ans = null;
           if (i<lines.length) {
-            const m3 = lines[i].match(/^\s*(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4])\s*$/i);
-            if (m3) { ans = normalizeAnswerToken(m3[1]); i++; }
+            const m3 = lines[i].match(/^(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4])\s*$/i);
+            if (m3) { ans = normalizeAnswerToken(m3[1].trim()); i++; }
           }
           if (q && opts.length === 4) blocks.push({ q, options: opts, correct: ans });
         }
