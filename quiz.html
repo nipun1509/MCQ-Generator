@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Quiz Times — VIT Bhopal Edition</title>
+  <!-- Fonts to evoke newspaper / TOI feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #faf6e9;    /* warm newsprint */
+      --ink: #111;
+      --rule: #1f1f1f;
+      --accent: #c70000;  /* TOI-like red */
+      --muted: #444;
+      --card: #fffdf6;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Merriweather", Georgia, "Times New Roman", serif; line-height: 1.55; }
+    .hidden { display: none !important; }
+
+    /* FRONT PAGE (newspaper) */
+    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .masthead { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 3px solid var(--rule); padding-bottom: 8px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { background: var(--accent); color: #fff; padding: 6px 12px; font-weight: 900; letter-spacing: .5px; border-radius: 2px; font-family: "Playfair Display", Georgia, serif; font-size: clamp(16px, 2vw, 20px); }
+    .papername { font-family: "Playfair Display", Georgia, serif; font-size: clamp(18px, 3vw, 24px); letter-spacing: .06em; text-transform: uppercase; }
+    .edition { font-size: 12px; border-left: 1px solid var(--rule); padding-left: 12px; margin-left: 8px; color: #333; }
+    .dateline { font-size: 12px; text-transform: uppercase; color: #333; }
+
+    .banner { font-family: "Playfair Display", Georgia, serif; font-size: clamp(32px, 6vw, 56px); text-align: center; font-weight: 900; letter-spacing: .3px; margin: 18px 0 10px; line-height: 1.1; }
+    .subhed { text-align: center; font-size: 14px; color: #444; margin-bottom: 10px; }
+    .rulestrip { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 6px 0; margin-bottom: 14px; }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+    @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } .edition { display: none; } }
+
+    .article { border-top: 1px solid var(--rule); padding-top: 12px; }
+    .kicker { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555; }
+    .headline { font-family: "Playfair Display"; font-size: 24px; margin: 6px 0 8px; }
+    .dek { font-size: 14px; color: #333; }
+    .byline { font-size: 12px; color:#666; margin: 6px 0 8px; }
+
+    /* Center input card */
+    .input-card { border: 1.5px solid var(--rule); background: var(--card); padding: 16px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
+    .dropzone { border: 2px dashed #666; padding: 16px; background: rgba(0,0,0,.02); }
+    textarea { width: 100%; min-height: 200px; resize: vertical; padding: 12px; border: 1px solid #bbb; border-radius: 4px; font-size: 14px; background: #fff; color: #111; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .toolbar { display:flex; gap:10px; align-items:center; flex-wrap: wrap; margin-top: 10px; }
+    .button { background: var(--accent); color: #fff; padding: 10px 16px; border: none; cursor: pointer; font-weight: 800; letter-spacing: .2px; border-radius: 4px; }
+    .button.secondary { background: #1f1f1f; }
+    .muted { font-size: 12px; color: #555; }
+    .example { text-decoration: underline dotted; cursor: pointer; }
+
+    .footer { border-top: 2px solid var(--rule); margin-top: 24px; padding-top: 10px; font-size: 12px; color: #444; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+    /* QUIZ VIEW (clean white page) */
+    body.quiz-mode { background: #ffffff; color: #111; }
+    .quiz-wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .quiz-header { display:flex; align-items:center; justify-content: space-between; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    .quiz-brand { font-family: "Playfair Display", Georgia, serif; font-weight: 900; font-size: clamp(18px, 3vw, 22px); letter-spacing: .04em; color: #111; }
+    .quiz-title { font-family: "Playfair Display", Georgia, serif; font-size: clamp(28px, 6vw, 44px); text-align: center; margin: 16px 0 6px; font-weight: 900; }
+    .quiz-actions { display:flex; gap:10px; align-items:center; }
+    .btn { background: #111; color:#fff; padding:10px 14px; border:none; border-radius: 6px; font-weight:700; cursor:pointer; }
+    .btn.light { background: #f2f2f2; color:#111; border:1px solid #ddd; }
+    .scorebar { display:flex; align-items:center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ccc; font-size: 14px; color:#333; }
+
+    .quiz { display:grid; gap: 14px; padding: 14px 0 28px; }
+    .q { border:1px solid #e5e5e5; border-radius: 8px; padding: 14px; background:#fff; }
+    .q-title { margin:0 0 10px; font-weight: 900; font-family:"Merriweather", Georgia, serif; }
+    .options { display:grid; gap: 8px; }
+    .option { display:flex; gap:10px; align-items:flex-start; background:#fafafa; padding:8px 10px; border-radius:8px; border:1px solid #eee; cursor:pointer; }
+    .option:hover { background:#f2f2f2; }
+    .pill { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; }
+    .pill.good { background:#e7ffe7; border:1px solid #b5e8b5; color:#0b6f2a; }
+    .pill.bad { background:#ffe7e7; border:1px solid #f3b3b3; color:#8a0f0f; }
+
+    .center { text-align:center; }
+  </style>
+</head>
+<body>
+  <!-- FRONT PAGE (Newspaper style, VIT Bhopal news + centered input) -->
+  <div id="frontPage" class="container">
+    <header class="masthead" role="banner">
+      <div class="brand" aria-label="Paper identity">
+        <div class="logo" aria-hidden="true">THE QUIZ TIMES</div>
+        <div class="papername">VIT Bhopal Edition</div>
+        <div class="edition">Vol. 1 · No. 2</div>
+      </div>
+      <div class="dateline" id="dateline">—</div>
+    </header>
+
+    <h1 class="banner">Campus Chronicle: VIT Bhopal</h1>
+    <p class="subhed">Read the latest campus buzz — and turn your own text into an instant MCQ quiz.</p>
+    <div class="rulestrip"></div>
+
+    <main class="grid" role="main">
+      <section class="article" aria-labelledby="lead-hed">
+        <div class="kicker">Lead Story</div>
+        <h2 id="lead-hed" class="headline">TechnoVIT Announces New Hackathon, Record Registrations Expected</h2>
+        <div class="byline">By Campus Bureau</div>
+        <p class="dek">VIT Bhopal's annual tech fest returns with a 36‑hour hackathon, workshops on AI/ML, and industry mentorship. Student clubs report early sign‑ups from across Central India.</p>
+
+        <div class="input-card" role="region" aria-label="Paste your questions to generate quiz">
+          <div class="kicker" style="margin-bottom:6px;">Create MCQs in One Click</div>
+          <div class="dropzone">
+            <textarea id="rawInput" placeholder="Paste your questions here in this exact pattern:\n\nQuestion text\n1) Option A\n2) Option B\n3) Option C\n4) Option D\nAnswer: 2\n\n(Repeat for many questions)"></textarea>
+            <div class="toolbar">
+              <button id="btnExample" class="button" type="button">Paste Example</button>
+              <button id="btnGenerate" class="button" type="button">Generate Quiz</button>
+              <button id="btnClear" class="button secondary" type="button">Clear</button>
+              <span class="muted">Format accepted: 4 options labelled 1) 2) 3) 4) and optional <em>Answer:</em> (1‑4 or A‑D).</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="dek" style="margin-top:12px;">Tip: You can paste 10 or 100+ questions — the quiz will render on a clean white page.</p>
+      </section>
+
+      <aside class="article" aria-labelledby="side-hed">
+        <div class="kicker">Campus Briefs</div>
+        <h3 id="side-hed" class="headline">News in Short</h3>
+        <ul class="dek">
+          <li><strong>Placements:</strong> Pre‑placement talks begin next week with product‑based firms focusing on full‑stack roles.</li>
+          <li><strong>Library Hours:</strong> Extended to midnight during exam season; quiet zones added on Level 2.</li>
+          <li><strong>Hostel:</strong> New Wi‑Fi backbone installed; reported speeds up by 40% in peak hours.</li>
+          <li><strong>Sports:</strong> Inter‑college cricket league returns; trials open Friday.</li>
+        </ul>
+        <div class="kicker" style="margin-top:12px;">Editorial</div>
+        <p class="dek"><em>Opinion:</em> Making space for maker culture — why student‑led labs matter more than ever.</p>
+      </aside>
+    </main>
+
+    <section class="grid" aria-label="More VIT Bhopal Stories" style="margin-top:16px;">
+      <article class="article">
+        <div class="kicker">Academics</div>
+        <h3 class="headline">Data Science Minor Tracks Announced</h3>
+        <p class="dek">The School of Computing introduces new elective pathways in data engineering and applied AI, aligned with industry certifications.</p>
+      </article>
+      <article class="article">
+        <div class="kicker">Innovation</div>
+        <h3 class="headline">Robotics Club Unveils Autonomous Rover</h3>
+        <p class="dek">Built on ROS 2 with custom vision pipelines, the rover navigated the test arena with centimeter‑level accuracy.</p>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <div>© <span id="year">—</span> The Quiz Times · VIT Bhopal Edition</div>
+      <div>Designed in a classic newspaper motif · Front page only — quiz loads on a separate white view</div>
+    </footer>
+  </div>
+
+  <!-- QUIZ VIEW (white page) -->
+  <div id="quizView" class="hidden">
+    <div class="quiz-wrap">
+      <div class="quiz-header">
+        <div class="quiz-brand">THE QUIZ TIMES</div>
+        <div class="quiz-actions">
+          <button id="btnStartOver" class="btn light" type="button">Start Over</button>
+        </div>
+      </div>
+
+      <h1 class="quiz-title">Your MCQ Quiz</h1>
+      <div id="scorebar" class="scorebar hidden"></div>
+      <div id="quiz" class="quiz"></div>
+      <div class="center" style="padding:12px 0 28px;">
+        <button id="btnSubmit" class="btn" type="button">Submit & Score</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Helpers for dateline ---
+    const datelineEl = document.getElementById('dateline');
+    const yearEl = document.getElementById('year');
+    function formatDateline() {
+      try {
+        const now = new Date();
+        const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' };
+        if (datelineEl) datelineEl.textContent = new Intl.DateTimeFormat('en-IN', opts).format(now) + ' · Bhopal';
+        if (yearEl) yearEl.textContent = new Intl.DateTimeFormat('en-IN', { year: 'numeric', timeZone: 'Asia/Kolkata' }).format(now);
+      } catch(e) { if (datelineEl) datelineEl.textContent = 'Today · Bhopal'; }
+    }
+    formatDateline();
+
+    // --- Parsing logic (same simple format you use) ---
+    function normalizeAnswerToken(tok) {
+      if (!tok) return null;
+      const s = String(tok).trim();
+      if (/^[1-4]$/.test(s)) return Number(s) - 1; // 0..3
+      const map = { A:0, B:1, C:2, D:3 };
+      const key = s.toUpperCase();
+      return key in map ? map[key] : null;
+    }
+
+    // Greedy but robust block matcher: Q + 1) 2) 3) 4) + optional Answer:
+    function parseInput(text) {
+      const blocks = [];
+      const bigRe = /\s*([^\n].*?)\s*\n\s*1\)\s*(.*?)\s*\n\s*2\)\s*(.*?)\s*\n\s*3\)\s*(.*?)\s*\n\s*4\)\s*(.*?)(?:\n\s*(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4]))?(?:\n{2,}|\n?$)/g;
+      let m; let index = 0;
+      while ((m = bigRe.exec(text)) !== null) {
+        const q = m[1].trim();
+        const options = [m[2], m[3], m[4], m[5]].map(s => s.trim());
+        const correct = normalizeAnswerToken(m[6]);
+        blocks.push({ q, options, correct, id: index++ });
+      }
+
+      // fallback: line-walker (handles slight format issues)
+      if (!blocks.length) {
+        const lines = text.split(/\r?\n/);
+        for (let i=0; i<lines.length;) {
+          while (i<lines.length && !lines[i].trim()) i++;
+          if (i>=lines.length) break;
+          const q = lines[i++].trim();
+          const opts = [];
+          for (let k=1; k<=4 && i<lines.length; k++) {
+            const m2 = lines[i].match(/^\s*\d\)\s*(.*)$/);
+            if (!m2) break; opts.push(m2[1].trim()); i++;
+          }
+          let ans = null;
+          if (i<lines.length) {
+            const m3 = lines[i].match(/^\s*(?:Answer|Ans|Correct)\s*[:\-]?\s*([A-D1-4])\s*$/i);
+            if (m3) { ans = normalizeAnswerToken(m3[1]); i++; }
+          }
+          if (q && opts.length === 4) blocks.push({ q, options: opts, correct: ans });
+        }
+      }
+      return blocks;
+    }
+
+    // --- Rendering ---
+    const frontPage = document.getElementById('frontPage');
+    const quizView  = document.getElementById('quizView');
+    const rawInput  = document.getElementById('rawInput');
+    const quizEl    = document.getElementById('quiz');
+    const scorebar  = document.getElementById('scorebar');
+
+    function renderQuiz(blocks) {
+      quizEl.innerHTML = '';
+      if (!blocks.length) {
+        quizEl.innerHTML = '<div>⚠️ No questions detected. Go back and check your format.</div>';
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      blocks.forEach((b, i) => {
+        const qWrap = document.createElement('div'); qWrap.className = 'q'; qWrap.dataset.index = i;
+        const title = document.createElement('p'); title.className = 'q-title'; title.textContent = `${i+1}. ${b.q}`; qWrap.appendChild(title);
+        const opts = document.createElement('div'); opts.className = 'options';
+        b.options.forEach((opt, j) => {
+          const id = `q${i}_o${j}`;
+          const label = document.createElement('label'); label.className = 'option'; label.setAttribute('for', id);
+          const radio = document.createElement('input'); radio.type = 'radio'; radio.name = `q${i}`; radio.value = String(j); radio.id = id;
+          const span = document.createElement('span'); span.textContent = `${['A','B','C','D'][j]}) ${opt}`;
+          label.appendChild(radio); label.appendChild(span); opts.appendChild(label);
+        });
+        qWrap.appendChild(opts); frag.appendChild(qWrap);
+      });
+      quizEl.appendChild(frag);
+    }
+
+    function scoreQuiz(blocks) {
+      let correctCount = 0; let unanswered = 0;
+      blocks.forEach((b,i) => {
+        const chosen = document.querySelector(`input[name="q${i}"]:checked`);
+        const idx = chosen ? Number(chosen.value) : null;
+        if (idx == null) unanswered++; else if (b.correct != null && idx === b.correct) correctCount++;
+      });
+      const total = blocks.length;
+      scorebar.classList.remove('hidden');
+      const hadNoKey = blocks.filter(b => b.correct == null).length;
+      scorebar.innerHTML = `
+        <div class="pill ${correctCount/total >= 0.5 ? 'good' : 'bad'}">Score: ${correctCount} / ${total}</div>
+        <div>Unanswered: ${unanswered}${hadNoKey?` · No key for ${hadNoKey} q(s)`:''}</div>
+      `;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Navigation between views ---
+    function goToQuiz() {
+      // Persist raw text and navigate
+      const text = (rawInput?.value || '').trim();
+      if (!text) { alert('Paste your questions first.'); return; }
+      sessionStorage.setItem('mcq_raw', text);
+      // Simulate "reload and go to next page": change hash then reload
+      const url = new URL(window.location.href);
+      url.hash = '#quiz';
+      window.location.replace(url.toString());
+    }
+
+    function showFront() {
+      document.title = 'The Quiz Times — VIT Bhopal Edition';
+      document.body.classList.remove('quiz-mode');
+      frontPage.classList.remove('hidden');
+      quizView.classList.add('hidden');
+    }
+
+    function showQuiz() {
+      document.title = 'The Quiz Times — Quiz';
+      document.body.classList.add('quiz-mode');
+      frontPage.classList.add('hidden');
+      quizView.classList.remove('hidden');
+      const raw = sessionStorage.getItem('mcq_raw') || '';
+      const blocks = parseInput(raw);
+      renderQuiz(blocks);
+      // Hook submit button for this render
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.onclick = () => scoreQuiz(blocks);
+    }
+
+    const backBtn = document.getElementById('backBtn');
+    backBtn.onclick = () => {
+        quizView.classList.add('hidden');
+        frontPage.classList.remove('hidden');
+        window.scrollTo({ top: 0 });
+    };
+
+
+    function route() {
+      if (window.location.hash === '#quiz') showQuiz(); else showFront();
+    }
+
+    window.addEventListener('hashchange', route);
+
+    // --- Front page controls ---
+    const btnExample = document.getElementById('btnExample');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnClear = document.getElementById('btnClear');
+    const btnStartOver = document.getElementById('btnStartOver');
+
+    function exampleText() {
+      return `What is the capital of France?\n1) Berlin\n2) Madrid\n3) Paris\n4) Rome\nAnswer: 3\n\n2 + 2 equals?\n1) 3\n2) 4\n3) 5\n4) 22\nAnswer: 2\n\nChoose the vowel:\n1) B\n2) A\n3) C\n4) D\nAnswer: B`;
+    }
+
+    if (btnExample) btnExample.addEventListener('click', () => { rawInput.value = exampleText(); rawInput.focus(); });
+    if (btnGenerate) btnGenerate.addEventListener('click', goToQuiz);
+    if (btnClear) btnClear.addEventListener('click', () => { rawInput.value = ''; rawInput.focus(); });
+    if (btnStartOver) btnStartOver.addEventListener('click', () => { sessionStorage.removeItem('mcq_raw'); window.location.replace(window.location.pathname); });
+
+    // Initial route
+    route();
+  </script>
+</body>
+</html>
