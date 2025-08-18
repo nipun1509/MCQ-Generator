@@ -261,22 +261,73 @@
     }
 
     function scoreQuiz(blocks) {
-      let correctCount = 0; let unanswered = 0;
-      blocks.forEach((b,i) => {
+      let correctCount = 0;
+      let unanswered = 0;
+
+      blocks.forEach((b, i) => {
         const chosen = document.querySelector(`input[name="q${i}"]:checked`);
         const idx = chosen ? Number(chosen.value) : null;
-        if (idx == null) unanswered++; else if (b.correct != null && idx === b.correct) correctCount++;
+        const qWrap = document.querySelector(`.q[data-index="${i}"]`);
+
+    // Remove old pills if re-submitting
+        qWrap.querySelectorAll('.pill').forEach(el => el.remove());
+
+        if (idx == null) {
+          unanswered++;
+          if (b.correct != null) {
+            const correctOpt = qWrap.querySelector(`label[for="q${i}_o${b.correct}"]`);
+            if (correctOpt) {
+              const pill = document.createElement('span');
+              pill.className = 'pill good';
+              pill.textContent = `Correct: ${['A','B','C','D'][b.correct]}) ${b.options[b.correct]}`;
+              correctOpt.appendChild(pill);
+            }
+          }
+        } else if (b.correct != null && idx === b.correct) {
+          correctCount++;
+          const correctOpt = qWrap.querySelector(`label[for="q${i}_o${b.correct}"]`);
+          if (correctOpt) {
+            const pill = document.createElement('span');
+            pill.className = 'pill good';
+            pill.textContent = '✔ Correct';
+            correctOpt.appendChild(pill);
+          }
+        } else {
+      // Wrong answer chosen
+          const chosenOpt = qWrap.querySelector(`label[for="q${i}_o${idx}"]`);
+          if (chosenOpt) {
+            const pill = document.createElement('span');
+            pill.className = 'pill bad';
+            pill.textContent = '✘ Wrong';
+            chosenOpt.appendChild(pill);
+          }
+      // Show correct one
+          if (b.correct != null) {
+            const correctOpt = qWrap.querySelector(`label[for="q${i}_o${b.correct}"]`);
+            if (correctOpt) {
+              const pill = document.createElement('span');
+              pill.className = 'pill good';
+              pill.textContent = `✔ Correct: ${['A','B','C','D'][b.correct]}) ${b.options[b.correct]}`;
+              correctOpt.appendChild(pill);
+            }
+          }
+        }
       });
+
       const total = blocks.length;
       scorebar.classList.remove('hidden');
       const hadNoKey = blocks.filter(b => b.correct == null).length;
       scorebar.innerHTML = `
-        <div class="pill ${correctCount/total >= 0.5 ? 'good' : 'bad'}">Score: ${correctCount} / ${total}</div>
-        <div>Unanswered: ${unanswered}${hadNoKey?` · No key for ${hadNoKey} q(s)`:''}</div>
+        <div class="pill ${correctCount/total >= 0.5 ? 'good' : 'bad'}">
+          Score: ${correctCount} / ${total}
+        </div>
+        <div>
+          Unanswered: ${unanswered}${hadNoKey?` · No key for ${hadNoKey} q(s)`:''}
+        </div>
       `;
       window.scrollTo({ top: 0, behavior: 'smooth' });
-
     }
+
 
     // --- Navigation between views ---
     function goToQuiz() {
